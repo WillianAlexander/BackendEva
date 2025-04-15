@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DepartamentosController } from 'src/controllers/departamentos.controller';
 import { Departamento } from 'src/entities/departamentos.entity';
 import { DepartamentosService } from 'src/services/departamentos.service';
+import { AuthModule } from './auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Departamento])],
+  imports: [TypeOrmModule.forFeature([Departamento]), AuthModule],
   controllers: [DepartamentosController],
   providers: [DepartamentosService],
   exports: [DepartamentosService],

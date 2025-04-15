@@ -59,6 +59,17 @@ $ npm run test:cov
 
 ## Deployment
 
+Need to set .env
+{
+  AZURE_CLIENT_ID=tu-client-id
+  AZURE_CLIENT_SECRET=tu-client-secret
+  AZURE_TENANT_ID=tu-tenant-id
+  AZURE_REDIRECT_URI=http://localhost:4000/auth/callback
+}
+
+Version openid-client : npm install openid-client@5.1.6
+Instalar config para process.env: npm i @nestjs/config
+
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
 If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
