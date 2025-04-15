@@ -11,17 +11,20 @@ export class AuthController {
   getLoginUrl() {
     const { codeVerifier, codeChallenge } = this.authService.generatePKCE();
     const url = this.authService.getAuthUrl(codeChallenge);
-    return { url, codeVerifier }; // En producción, guarda el codeVerifier en sesión o cache.
+    return { url, codeVerifier }; // En producción, guardar el codeVerifier en sesión o cache.
   }
 
   @Post('callback')
   async handleCallback(@Body() body: { code: string; codeVerifier: string }) {
-    console.log(`body: ${JSON.stringify(body)}`);
     const tokens = await this.authService.exchangeCode(
       body.code,
       body.codeVerifier,
     );
+
+    const email: string = this.authService.getUserFromIdToken(tokens);
+
     return {
+      email: email,
       accessToken: tokens.access_token,
       idToken: tokens.id_token,
       expiresIn: tokens.expires_in,

@@ -1,18 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Issuer, Client, generators, TokenSet } from 'openid-client';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   private client: Client;
 
-  constructor() {
-    this.init()
-      .then(() => console.log('Azure client initialized', 'AuthService'))
-      .catch((err) => console.log(err));
+  async onModuleInit() {
+    await this.init();
   }
+  // constructor() {
+  //   this.init()
+  //     .then(() => console.log('Azure client initialized', 'AuthService'))
+  //     .catch((err) => console.log(err));
+  // }
 
   private async init() {
     const issuerUrl = `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/v2.0`;
@@ -70,5 +73,13 @@ export class AuthService {
       { code_verifier: codeVerifier },
     );
     return tokenSet;
+  }
+
+  getUserFromIdToken(tokenSet: TokenSet): string {
+    const { email } = tokenSet.claims();
+    if (!email || typeof email !== 'string' || email.trim() === '') {
+      throw new Error('Invalid claims in token set.');
+    }
+    return email; // Contiene email, nombre, etc.
   }
 }
