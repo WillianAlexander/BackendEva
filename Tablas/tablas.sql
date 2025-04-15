@@ -1,0 +1,166 @@
+-- ALTER TABLE departamentos
+-- ALTER COLUMN fhasta SET DEFAULT '2999-12-31 00:00:00';
+
+-- ALTER TABLE eva.roles
+-- ALTER COLUMN fhasta SET DEFAULT '2999-12-31 00:00:00';
+
+CREATE TABLE eva.roles (
+    id INTEGER GENERATED ALWAYS AS IDENTITY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (id, fhasta)
+);
+
+ALTER TABLE IF EXISTS eva.roles
+    OWNER to postgres;
+
+INSERT INTO eva.ROLES (nombre) VALUES ('ADMIN');
+INSERT INTO eva.ROLES (nombre) VALUES ('EVALUADOR');
+INSERT INTO eva.ROLES (nombre) VALUES ('JEFE');
+INSERT INTO eva.ROLES (nombre) VALUES ('GERENTE');
+
+CREATE TABLE eva.departamentos (
+    id INTEGER GENERATED ALWAYS AS IDENTITY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (id, fhasta)
+);
+
+ALTER TABLE IF EXISTS eva.departamentos
+    OWNER to postgres;
+
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('TECNOLOGIA');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('INVERSIONES - CAPTACIONES');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('OPERACIONES');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('SEGURIDAD FISICA Y ELECTRONICA');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('PROCESOS');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('FINANCIERO');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('CREDITO Y COBRANZAS');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('SEGURIDAD DE LA INFORMACION Y PROTECCION DE DATOS');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('TALENTO HUMANO');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('TESORERIA');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('RIESGOS');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('CUMPLIMIENTO');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('COMUNICACION');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('JURIDICO');
+INSERT INTO eva.DEPARTAMENTOS (nombre) VALUES ('SEGUROS');
+
+/* CREATE TABLE eva.usuarios (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    correo VARCHAR(100) UNIQUE NOT NULL,
+	password VARCHAR(255) NOT NULL,
+    rol_id INTEGER NOT NULL REFERENCES eva.roles(id),
+    departamento_id INTEGER REFERENCES eva.departamentos(id) ON DELETE SET NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+); */
+
+/* TABLA CORREGIDA PARA OPTIMISTIC LOCKING - CONTROL DE VERSIONES - CONCURRENCIA*/
+/* CREATE TABLE eva.usuarios (
+    usuario VARCHAR(50) PRIMARY KEY UNIQUE NOT NULL,
+    nombres VARCHAR(100) NOT NULL,
+    apellidos VARCHAR(100) NOT NULL,
+    identificacion VARCHAR(30) UNIQUE NOT NULL,
+    correo VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    rol_id INTEGER REFERENCES eva.roles(id),
+    departamento_id INTEGER REFERENCES eva.departamentos(id) ON DELETE SET NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    version INTEGER NOT NULL DEFAULT 0
+); */
+
+-- CORRECCION DOS PARA HISTORICO
+CREATE TABLE eva.usuarios (
+    usuario VARCHAR(50) NOT NULL,
+    nombres VARCHAR(100) NOT NULL,
+    apellidos VARCHAR(100) NOT NULL,
+    identificacion VARCHAR(30) NOT NULL,
+    correo VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    rol_id INTEGER REFERENCES eva.roles(id),
+    departamento_id INTEGER REFERENCES eva.departamentos(id) ON DELETE SET NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    fhasta TIMESTAMP NOT NULL DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    version INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (usuario, fhasta)
+);
+
+
+ALTER TABLE IF EXISTS eva.usuarios
+    OWNER to postgres;
+
+CREATE TABLE eva.estados_informe (
+    id VARCHAR(30), -- Ej: 'recibido', 'evaluado'
+    descripcion TEXT,
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (id, fhasta)
+);
+
+ALTER TABLE IF EXISTS eva.estados_informe
+	OWNER to postgres;
+
+CREATE TABLE eva.informes (
+    usuario_entrega_id INTEGER NOT NULL REFERENCES eva.usuarios(id) ON DELETE SET NULL,
+    periodo DATE NOT NULL, -- Ej: '2025-03-01'
+    fecha_entrega TIMESTAMP,
+    contenido TEXT NOT NULL, -- PDF en base64 o texto plano
+    estado_id VARCHAR(30) NOT NULL REFERENCES eva.estados_informe(id),
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	version INTEGER NOT NULL DEFAULT 0,
+
+    PRIMARY KEY (usuario_entrega_id, periodo, version)
+);
+
+ALTER TABLE IF EXISTS eva.informes
+	OWNER to postgres;
+
+CREATE TABLE eva.criterios_evaluacion (
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE IF EXISTS eva.criterios_evaluacion
+	OWNER to postgres;
+
+CREATE TABLE eva.evaluaciones (
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    usuario_entrega_id INTEGER NOT NULL REFERENCES eva.usuarios(id),
+    periodo DATE NOT NULL,
+    evaluador_id INTEGER REFERENCES eva.usuarios(id) ON DELETE SET NULL,
+    fecha_evaluacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    comentarios TEXT,
+    puntaje_total NUMERIC(5,2),
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    version INTEGER NOT NULL,
+
+    FOREIGN KEY (usuario_entrega_id, periodo, version)
+        REFERENCES eva.informes (usuario_entrega_id, periodo, version)
+        ON DELETE CASCADE
+);
+
+ALTER TABLE IF EXISTS eva.evaluaciones
+	OWNER to postgres;
+
+CREATE TABLE eva.detalle_evaluacion (
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    evaluacion_id INTEGER NOT NULL REFERENCES eva.evaluaciones(id) ON DELETE CASCADE,
+    criterio_id INTEGER NOT NULL REFERENCES eva.criterios_evaluacion(id),
+    calificacion INTEGER NOT NULL CHECK (calificacion BETWEEN 1 AND 5),
+    fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
+    fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE IF EXISTS eva.detalle_evaluacion
+	OWNER to postgres;

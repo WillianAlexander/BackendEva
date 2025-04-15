@@ -1,0 +1,22 @@
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RolesModule } from './modules/roles.module';
+import { DepartamentosModule } from './modules/departamentos.module';
+import { UsuariosModule } from './modules/usuarios.module';
+import { EstadosInformeModule } from './modules/estados-informe.module';
+import ormConfig from './ormconfig';
+
+@Module({
+  imports: [
+    TypeOrmModule.forRoot(ormConfig),
+    RolesModule,
+    DepartamentosModule,
+    UsuariosModule,
+    EstadosInformeModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
