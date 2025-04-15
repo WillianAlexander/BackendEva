@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -10,7 +9,9 @@ export class AuthService {
   private client: Client;
 
   constructor() {
-    this.init();
+    this.init()
+      .then(() => console.log('Azure client initialized', 'AuthService'))
+      .catch((err) => console.log(err));
   }
 
   private async init() {
@@ -24,8 +25,6 @@ export class AuthService {
       redirect_uris: [process.env.AZURE_REDIRECT_URI!],
       response_types: ['code'],
     });
-
-    console.log('Azure client initialized', 'AuthService');
   }
 
   generatePKCE() {
@@ -35,11 +34,33 @@ export class AuthService {
   }
 
   getAuthUrl(codeChallenge: string): string {
-    return this.client.authorizationUrl({
+    if (
+      !codeChallenge ||
+      typeof codeChallenge !== 'string' ||
+      codeChallenge.trim() === ''
+    ) {
+      throw new Error(
+        'El parámetro codeChallenge es inválido. Debe ser una cadena no vacía.',
+      );
+    }
+
+    const url: string = this.client.authorizationUrl({
       scope: 'openid profile email',
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
     });
+
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      throw new Error('La URL generada es inválida.');
+    }
+
+    try {
+      new URL(url);
+    } catch {
+      throw new Error('La URL generada no es válida.');
+    }
+
+    return url;
   }
 
   async exchangeCode(code: string, codeVerifier: string): Promise<TokenSet> {
