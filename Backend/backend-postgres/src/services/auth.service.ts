@@ -11,11 +11,6 @@ export class AuthService implements OnModuleInit {
   async onModuleInit() {
     await this.init();
   }
-  // constructor() {
-  //   this.init()
-  //     .then(() => console.log('Azure client initialized', 'AuthService'))
-  //     .catch((err) => console.log(err));
-  // }
 
   private async init() {
     const issuerUrl = `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/v2.0`;
@@ -80,6 +75,6 @@ export class AuthService implements OnModuleInit {
     if (!email || typeof email !== 'string' || email.trim() === '') {
       throw new Error('Invalid claims in token set.');
     }
-    return email; // Contiene email, nombre, etc.
+    return email;
   }
 }
