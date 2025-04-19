@@ -14,15 +14,19 @@ export class AuthService implements OnModuleInit {
 
   private async init() {
     const issuerUrl = `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/v2.0`;
-
-    const azureIssuer = await Issuer.discover(issuerUrl);
-
-    this.client = new azureIssuer.Client({
-      client_id: process.env.AZURE_CLIENT_ID!,
-      client_secret: process.env.AZURE_CLIENT_SECRET!,
-      redirect_uris: [process.env.AZURE_REDIRECT_URI!],
-      response_types: ['code'],
-    });
+    try {
+      const azureIssuer = await Issuer.discover(issuerUrl);
+      this.client = new azureIssuer.Client({
+        client_id: process.env.AZURE_CLIENT_ID!,
+        client_secret: process.env.AZURE_CLIENT_SECRET!,
+        redirect_uris: [process.env.AZURE_REDIRECT_URI!],
+        response_types: ['code'],
+      });
+      console.log('Cliente OpenID configurado'); // 👈 log útil
+    } catch (err) {
+      console.error('Error descubriendo issuer o creando cliente:', err);
+      throw err;
+    }
   }
 
   generatePKCE() {
@@ -42,10 +46,17 @@ export class AuthService implements OnModuleInit {
       );
     }
 
-    const url: string = this.client.authorizationUrl({
+    // const url: string = this.client.authorizationUrl({
+    //   scope: 'openid profile email',
+    //   code_challenge: codeChallenge,
+    //   code_challenge_method: 'S256',
+    // });
+
+    const url = this.client.authorizationUrl({
       scope: 'openid profile email',
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
+      redirect_uri: process.env.AZURE_REDIRECT_URI!, // importante
     });
 
     if (!url || typeof url !== 'string' || url.trim() === '') {
@@ -58,10 +69,19 @@ export class AuthService implements OnModuleInit {
       throw new Error('La URL generada no es válida.');
     }
 
+    console.log(url);
     return url;
   }
 
   async exchangeCode(code: string, codeVerifier: string): Promise<TokenSet> {
+    // const tokenSet = await this.client.callback(
+    //   process.env.AZURE_REDIRECT_URI!,
+    //   { code },
+    //   { code_verifier: codeVerifier },
+    // );
+
+    console.log('exchangeCode');
+
     const tokenSet = await this.client.callback(
       process.env.AZURE_REDIRECT_URI!,
       { code },

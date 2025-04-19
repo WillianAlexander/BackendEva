@@ -24,7 +24,10 @@ export class UsuariosService {
   }
 
   findOne(usuario: string) {
-    return this.usuariosRepository.findOneBy({ usuario });
+    return this.usuariosRepository.findOneBy({
+      usuario: usuario,
+      fhasta: new Date('2999-12-31 00:00:00'),
+    });
   }
 
   remove(usuario: string) {

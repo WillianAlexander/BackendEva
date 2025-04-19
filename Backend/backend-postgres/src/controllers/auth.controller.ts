@@ -16,18 +16,18 @@ export class AuthController {
 
   @Post('callback')
   async handleCallback(@Body() body: { code: string; codeVerifier: string }) {
-    const tokens = await this.authService.exchangeCode(
+    const tokenSet = await this.authService.exchangeCode(
       body.code,
       body.codeVerifier,
     );
 
-    const email: string = this.authService.getUserFromIdToken(tokens);
+    const email: string = this.authService.getUserFromIdToken(tokenSet);
 
     return {
       email: email,
-      accessToken: tokens.access_token,
-      idToken: tokens.id_token,
-      expiresIn: tokens.expires_in,
+      accessToken: tokenSet.access_token,
+      idToken: tokenSet.id_token,
+      expiresIn: tokenSet.expires_in,
     };
   }
 }
