@@ -9,6 +9,8 @@ import {
   Patch,
   UseInterceptors,
   UploadedFile,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateInformeDto } from 'src/dto/create-informe.dto';
@@ -41,12 +43,25 @@ export class InformesController {
 
   @Post()
   @UseInterceptors(FileInterceptor('contenido'))
-  create(
+  async create(
     @Body() dto: CreateInformeDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    dto.contenido = file.buffer;
-    return this.informeService.create(dto);
+    try {
+      dto.contenido = file.buffer;
+      return await this.informeService.create(dto);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new HttpException(
+          'Ya existe un informe con los mismos datos.',
+          HttpStatus.CONFLICT,
+        );
+      }
+      throw new HttpException(
+        'Error al crear el informe.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Patch(':usuario')
