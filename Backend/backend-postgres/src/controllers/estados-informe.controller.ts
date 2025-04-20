@@ -5,7 +5,7 @@ import { EstadosInformeService } from 'src/services/estados-informe.service';
 @Controller('estados_informe')
 export class EstadosInformeController {
   constructor(private estadosInformeService: EstadosInformeService) {}
-  private fhasta: Date = new Date('2999-12-31 00:00:00');
+
   @Get()
   findAll() {
     return this.estadosInformeService.findAll();
@@ -13,7 +13,7 @@ export class EstadosInformeController {
 
   @Get(':id')
   findById(@Param('id') id: string) {
-    return this.estadosInformeService.findById(id, this.fhasta);
+    return this.estadosInformeService.findById(id);
   }
 
   @Post()

@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'estados_informe' })
 export class EstadosInforme {
-  @PrimaryColumn({ type: 'varchar', length: 30 })
+  @PrimaryColumn({ type: 'varchar', length: 5 })
   id: string;
 
   @Column()

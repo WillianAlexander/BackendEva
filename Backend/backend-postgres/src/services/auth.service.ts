@@ -22,7 +22,7 @@ export class AuthService implements OnModuleInit {
         redirect_uris: [process.env.AZURE_REDIRECT_URI!],
         response_types: ['code'],
       });
-      console.log('Cliente OpenID configurado'); // 👈 log útil
+      console.log('Cliente OpenID configurado');
     } catch (err) {
       console.error('Error descubriendo issuer o creando cliente:', err);
       throw err;

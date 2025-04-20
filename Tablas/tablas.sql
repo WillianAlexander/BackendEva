@@ -97,31 +97,34 @@ ALTER TABLE IF EXISTS eva.usuarios
     OWNER to postgres;
 
 CREATE TABLE eva.estados_informe (
-    id VARCHAR(30), -- Ej: 'recibido', 'evaluado'
+    id VARCHAR(5), -- Ej: 'R', 'E'
     descripcion TEXT,
     fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
     fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		PRIMARY KEY (id, fhasta)
+                PRIMARY KEY (id, fhasta)
 );
 
 ALTER TABLE IF EXISTS eva.estados_informe
-	OWNER to postgres;
+        OWNER to postgres;
+		
+INSERT INTO EVA.ESTADOS_INFORME (id, DESCRIPCION) VALUES ('R', 'RECIBIDO');
+INSERT INTO EVA.ESTADOS_INFORME (id, DESCRIPCION) VALUES ('E', 'EVALUADO');
 
 CREATE TABLE eva.informes (
-    usuario_entrega_id INTEGER NOT NULL REFERENCES eva.usuarios(id) ON DELETE SET NULL,
+    usuario_entrega VARCHAR(50) NOT NULL,
     periodo DATE NOT NULL, -- Ej: '2025-03-01'
     fecha_entrega TIMESTAMP,
-    contenido TEXT NOT NULL, -- PDF en base64 o texto plano
-    estado_id VARCHAR(30) NOT NULL REFERENCES eva.estados_informe(id),
+    contenido BYTEA NOT NULL, -- PDF binario directamente
+    estado_id VARCHAR(5) NOT NULL,
     fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
     fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	version INTEGER NOT NULL DEFAULT 0,
+    version INTEGER NOT NULL DEFAULT 0,
 
-    PRIMARY KEY (usuario_entrega_id, periodo, version)
+    PRIMARY KEY (usuario_entrega, periodo, version)
 );
 
 ALTER TABLE IF EXISTS eva.informes
-	OWNER to postgres;
+    OWNER to postgres;
 
 CREATE TABLE eva.criterios_evaluacion (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { AuthService } from './../services/auth.service';
 
