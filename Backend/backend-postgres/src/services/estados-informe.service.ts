@@ -14,8 +14,8 @@ export class EstadosInformeService {
     return this.estadosInformeRepository.find();
   }
 
-  findById(id: string, fhasta?: Date) {
-    return this.estadosInformeRepository.findOneBy({ id: id, fhasta: fhasta });
+  findById(id: string) {
+    return this.estadosInformeRepository.findOneBy({ id: id, fhasta: new Date('2999-12-31 00:00:00') });
   }
 
   create(id: string, descripcion: string) {

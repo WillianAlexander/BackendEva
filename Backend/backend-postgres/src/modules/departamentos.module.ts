@@ -6,7 +6,7 @@ import { DepartamentosService } from 'src/services/departamentos.service';
 import { AuthModule } from './auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Departamento]), AuthModule],
+  imports: [TypeOrmModule.forFeature([Departamento])],
   controllers: [DepartamentosController],
   providers: [DepartamentosService],
   exports: [DepartamentosService],
