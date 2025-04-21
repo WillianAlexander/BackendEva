@@ -29,12 +29,25 @@ export class InformesController {
   @Get(':usuario')
   async findOne(
     @Param('usuario') usuario: string,
-    @Query('periodo') periodo: string,
+    @Query('periodo') periodo?: Date, // Hacemos que periodo sea opcional
   ) {
-    const informe = await this.informeService.findOne(
+    const informe = await this.informeService.findListBy(
       usuario,
-      new Date(periodo),
+      periodo ? periodo : undefined, // Convertimos periodo a Date solo si existe
     );
+    if (!informe) {
+      throw new NotFoundException('Informe no encontrado');
+    }
+    return informe;
+  }
+
+  @Get(':usuario/fentrega')
+  async findOneByPeriod(
+    @Param('usuario') usuario: string,
+    @Query('fentrega') fentrega: Date,
+  ) {
+    const informe = await this.informeService.findByPeriod(usuario, fentrega);
+
     if (!informe) {
       throw new NotFoundException('Informe no encontrado');
     }
@@ -67,9 +80,9 @@ export class InformesController {
   @Patch(':usuario')
   async update(
     @Param('usuario') usuario: string,
-    @Query('periodo') periodo: string,
+    @Query('periodo') periodo: Date,
     @Body() nuevosDatos: UpdateInformeDto,
   ) {
-    return this.informeService.update(usuario, new Date(periodo), nuevosDatos);
+    return this.informeService.update(usuario, periodo, nuevosDatos);
   }
 }

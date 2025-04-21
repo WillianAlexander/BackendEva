@@ -17,10 +17,7 @@ export class Informes {
   @Column({ type: 'varchar', nullable: false })
   estado_id: string;
 
-  @PrimaryColumn({
-    type: 'timestamp',
-    default: () => '2999-12-31 00:00:00',
-  })
+  @PrimaryColumn({ type: 'timestamp', default: () => '2999-12-31 00:00:00' })
   fhasta: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

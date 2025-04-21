@@ -16,10 +16,23 @@ export class InformesService {
     return this.informesRepository.find();
   }
 
-  findOne(usuario: string, periodo: Date) {
-    return this.informesRepository.findOneBy({
+  findListBy(usuario: string, periodo?: Date) {
+    const whereCondition: any = {
       usuario_entrega: usuario,
-      periodo: periodo,
+      fhasta: new Date('2999-12-31 00:00:00'),
+    };
+
+    if (periodo) {
+      whereCondition.periodo = periodo;
+    }
+
+    return this.informesRepository.findBy(whereCondition);
+  }
+
+  findByPeriod(usuario: string, fentrega: Date) {
+    return this.informesRepository.findBy({
+      usuario_entrega: usuario,
+      fecha_entrega: fentrega,
       fhasta: new Date('2999-12-31 00:00:00'),
     });
   }
