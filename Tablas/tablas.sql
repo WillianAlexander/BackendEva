@@ -97,7 +97,7 @@ ALTER TABLE IF EXISTS eva.usuarios
     OWNER to postgres;
 
 CREATE TABLE eva.estados_informe (
-    id VARCHAR(5), -- Ej: 'R', 'E'
+    id VARCHAR(5), -- Ej: 'R', 'E', 'P'
     descripcion TEXT,
     fhasta TIMESTAMP DEFAULT '2999-12-31 00:00:00',
     fdesde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -109,6 +109,7 @@ ALTER TABLE IF EXISTS eva.estados_informe
 		
 INSERT INTO EVA.ESTADOS_INFORME (id, DESCRIPCION) VALUES ('R', 'RECIBIDO');
 INSERT INTO EVA.ESTADOS_INFORME (id, DESCRIPCION) VALUES ('E', 'EVALUADO');
+INSERT INTO EVA.ESTADOS_INFORME (id, DESCRIPCION) VALUES ('P', 'PENDIENTE');
 
 CREATE TABLE eva.informes (
     usuario_entrega VARCHAR(50) NOT NULL,
